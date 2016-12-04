@@ -13,8 +13,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -33,7 +37,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuItemClickListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final long LOCATION_REFRESH_TIME = 100;
     private static final float LOCATION_REFRESH_DISTANCE = .01f;
@@ -178,6 +182,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //       + address.getLongitude());
 
 
+    }
+
+    public void onButtonClickDirections(View v) {
+
+    }
+
+    public void onButtonClickReport(View v) {
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.setOnMenuItemClickListener(this);
+        popupMenu.inflate(R.menu.popup_menu);
+        popupMenu.show();
+    }
+
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menuGap:
+                Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.menuConstruct:
+                Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.menuEntrance:
+                Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.menuBike:
+                Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
+                return true;
+        }
+        return false;
     }
 
 }

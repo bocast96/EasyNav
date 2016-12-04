@@ -9,28 +9,51 @@
 
     <SearchView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/search_button"
         android:layout_gravity="left"
-        android:iconifiedByDefault="false"/>
+        android:layout_height="40dp" />
 
-
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:map="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="com.example.eznav.easynav.MapsActivity">
+        android:layout_height="match_parent">
 
-        <!--<ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/imageButton"
-            android:layout_gravity="right"
-            android:src="@android:drawable/ic_menu_directions" />-->
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.example.eznav.easynav.MapsActivity">
 
-    </fragment>
+        </fragment>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="60dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="82dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true">
+
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageButtonDir"
+                android:layout_gravity="right"
+                android:onClick="onButtonClickDirections"
+                style="?android:attr/borderlessButtonStyle"
+                android:src="@mipmap/directions" />
+
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageButtonReport"
+                android:layout_gravity="right"
+                android:onClick="onButtonClickReport"
+                style="?android:attr/borderlessButtonStyle"
+                android:src="@mipmap/report" />
+        </LinearLayout>
+    </RelativeLayout>
+
 
 </LinearLayout>
