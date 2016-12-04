@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/search_button"
-        android:layout_gravity="left" />
+        android:layout_gravity="left"
+        android:iconifiedByDefault="false"/>
 
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -23,12 +24,12 @@
         android:layout_height="match_parent"
         tools:context="com.example.eznav.easynav.MapsActivity">
 
-        <ImageButton
+        <!--<ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/imageButton"
             android:layout_gravity="right"
-            android:src="@android:drawable/ic_menu_directions" />
+            android:src="@android:drawable/ic_menu_directions" />-->
 
     </fragment>
 
