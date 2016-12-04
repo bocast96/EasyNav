@@ -8,6 +8,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -16,13 +17,17 @@ import android.os.Bundle;
 import android.widget.SearchView;
 import android.util.Log;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
+
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
@@ -33,7 +38,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final long LOCATION_REFRESH_TIME = 100;
     private static final float LOCATION_REFRESH_DISTANCE = .01f;
@@ -44,6 +49,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String addressText;
     private MarkerOptions markerOptions;
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,41 +64,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         final SearchView searchView = (SearchView) findViewById(R.id.search_button);
+        //searchView.setVisibility();
         searchView.clearFocus();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                                              @Override
-                                              public boolean onQueryTextSubmit(String query) {
-                                                  String g = query;
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                String g = query;
 
-                                                  Geocoder geocoder = new Geocoder(getBaseContext());
-                                                  List<Address> addresses = null;
+                Geocoder geocoder = new Geocoder(getBaseContext());
+                List<Address> addresses = null;
 
-                                                  try {
-                                                      // Getting a maximum of 3 Address that matches the input
-                                                      // text
-                                                      addresses = geocoder.getFromLocationName(g, 3);
-                                                      if (addresses != null && !addresses.equals("")) {
-                                                          search(addresses);
-                                                      }
-                                                      searchView.clearFocus();
+                try {
+                    // Getting a maximum of 3 Address that matches the input
+                    // text
+                    addresses = geocoder.getFromLocationName(g, 3);
+                    if (addresses != null && !addresses.equals("")) {
+                        search(addresses);
+                    }
+                    searchView.clearFocus();
 
-                                                  } catch (Exception e) {
+                } catch (Exception e) {
 
-                                                  }
-                                                  return true;
-                                              }
+                }
+                return true;
+            }
 
-                                              @Override
-                                              public boolean onQueryTextChange(String newText) {
-                                                  return false;
-                                              }
-                                          });
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
 
-                // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                        .findFragmentById(R.id.map);
+
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
 
@@ -102,6 +121,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         Log.i("TEST", "TEST");
         mMap = googleMap;
+
+        OnMapLongClickListener mapLongClickListener = new OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng point) {
+                Log.i("TEST2","TEST2");
+                mMap.addMarker(new MarkerOptions().position(point).title("Custom location")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+            }
+        };
+
+        mMap.setOnMapLongClickListener(mapLongClickListener);
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -122,33 +154,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
 
-
-        LatLng collegePark = new LatLng(38.9907439,-76.9362396);
-        LatLng avwilliams_bike_rack_front = new LatLng(38.9906623,-76.9364820);
-        LatLng avwilliams_bike_rack_side = new LatLng(38.9901492,-76.9365354);
+        LatLng collegePark = new LatLng(38.9907439, -76.9362396);
+        LatLng avwilliams_bike_rack_front = new LatLng(38.9906623, -76.9364820);
+        LatLng avwilliams_bike_rack_side = new LatLng(38.9901492, -76.9365354);
         mMap.addMarker(new MarkerOptions().position(collegePark).title("Marker in CP"));
 
         mMap.addMarker(new MarkerOptions().position(avwilliams_bike_rack_front).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         mMap.addMarker(new MarkerOptions().position(avwilliams_bike_rack_side).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        //mMap.addMarker(new MarkerOptions().position(avwilliams_bike_rack_side).icon(BitmapDescriptorFactory.fromResource(R.drawable.bikerackpin)));
+
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(collegePark));
         float zoomLevel = 17.0f; //This goes up to 21
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(collegePark, zoomLevel));
     }
 
-
-    @Override
-    public void onConnected(Bundle connectionHint) {
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
 
     protected void search(List<Address> addresses) {
 
@@ -177,4 +196,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Maps Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.example.eznav.easynav/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Maps Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.example.eznav.easynav/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }
 }
