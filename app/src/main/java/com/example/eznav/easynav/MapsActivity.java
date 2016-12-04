@@ -63,6 +63,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        //for search functionality
         final SearchView searchView = (SearchView) findViewById(R.id.search_button);
         //searchView.setVisibility();
         searchView.clearFocus();
@@ -167,7 +168,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         float zoomLevel = 17.0f; //This goes up to 21
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(collegePark, zoomLevel));
     }
-
 
     protected void search(List<Address> addresses) {
 
