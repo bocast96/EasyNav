@@ -50,6 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        //for search functionality
         final SearchView searchView = (SearchView) findViewById(R.id.search_button);
         searchView.clearFocus();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -150,6 +151,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    //called by onQuery listener
+    //geocoder gets address and converts it into longitude and lattitude
     protected void search(List<Address> addresses) {
 
         Address address = addresses.get(0);
