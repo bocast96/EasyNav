@@ -50,9 +50,11 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
     private GoogleMap mMap;
     private double home_long;
     private double home_lat;
-    private LatLng latLng;
+    private LatLng latLng, clickPos;
     private String addressText;
     private MarkerOptions markerOptions;
+    private GoogleMap.OnMapClickListener onMapClickListener;
+
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -111,6 +113,7 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
     }
 
 
@@ -128,17 +131,25 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
         Log.i("TEST", "TEST");
         mMap = googleMap;
 
+        onMapClickListener = new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                mMap.addMarker(new MarkerOptions().position(latLng).title("Custom location").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                mMap.setOnMapClickListener(null);
+            }
+        };
+
         OnMapLongClickListener mapLongClickListener = new OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng point) {
                 Log.i("TEST2","TEST2");
-                mMap.addMarker(new MarkerOptions().position(point).title("Custom location")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-
+                clickPos = point;
+                longClickReport();
             }
         };
 
         mMap.setOnMapLongClickListener(mapLongClickListener);
+
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -201,6 +212,14 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
 
     }
 
+    private void longClickReport() {
+        View v = findViewById(R.id.imageButtonReport);
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.setOnMenuItemClickListener(this);
+        popupMenu.inflate(R.menu.popup_menu);
+        popupMenu.show();
+    }
+
     public void onButtonClickDirections(View v) {
 
     }
@@ -215,19 +234,28 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuGap:
-                Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
-                return true;
+                // TODO: 12/4/2016 set icon
+                break;
             case R.id.menuConstruct:
-                Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
-                return true;
+                // TODO: 12/4/2016 set icon
+                break;
             case R.id.menuEntrance:
-                Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
-                return true;
+                // TODO: 12/4/2016 set icon
+                break;
             case R.id.menuBike:
-                Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
-                return true;
+                // TODO: 12/4/2016 set icon
+                break;
         }
-        return false;
+
+        if (clickPos == null) {
+            Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
+            mMap.setOnMapClickListener(onMapClickListener);
+        } else {
+            mMap.addMarker(new MarkerOptions().position(clickPos).title("Custom location").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            clickPos = null;
+        }
+
+        return true;
     }
 
     @Override
