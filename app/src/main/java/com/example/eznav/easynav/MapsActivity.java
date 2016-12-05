@@ -14,8 +14,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -38,16 +42,19 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuItemClickListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final long LOCATION_REFRESH_TIME = 100;
     private static final float LOCATION_REFRESH_DISTANCE = .01f;
     private GoogleMap mMap;
     private double home_long;
     private double home_lat;
-    private LatLng latLng;
+    private LatLng latLng, clickPos;
     private String addressText;
     private MarkerOptions markerOptions;
+    private GoogleMap.OnMapClickListener onMapClickListener;
+
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -106,6 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
     }
 
 
@@ -123,17 +131,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i("TEST", "TEST");
         mMap = googleMap;
 
+        onMapClickListener = new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                mMap.addMarker(new MarkerOptions().position(latLng).title("Custom location").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                mMap.setOnMapClickListener(null);
+            }
+        };
+
         OnMapLongClickListener mapLongClickListener = new OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng point) {
                 Log.i("TEST2","TEST2");
-                mMap.addMarker(new MarkerOptions().position(point).title("Custom location")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-
+                clickPos = point;
+                longClickReport();
             }
         };
 
         mMap.setOnMapLongClickListener(mapLongClickListener);
+
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -196,6 +212,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    private void longClickReport() {
+        View v = findViewById(R.id.imageButtonReport);
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.setOnMenuItemClickListener(this);
+        popupMenu.inflate(R.menu.popup_menu);
+        popupMenu.show();
+    }
+
+    public void onButtonClickDirections(View v) {
+
+    }
+
+    public void onButtonClickReport(View v) {
+        PopupMenu popupMenu = new PopupMenu(this, v);
+        popupMenu.setOnMenuItemClickListener(this);
+        popupMenu.inflate(R.menu.popup_menu);
+        popupMenu.show();
+    }
+
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menuGap:
+                // TODO: 12/4/2016 set icon
+                break;
+            case R.id.menuConstruct:
+                // TODO: 12/4/2016 set icon
+                break;
+            case R.id.menuEntrance:
+                // TODO: 12/4/2016 set icon
+                break;
+            case R.id.menuBike:
+                // TODO: 12/4/2016 set icon
+                break;
+        }
+
+        if (clickPos == null) {
+            Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
+            mMap.setOnMapClickListener(onMapClickListener);
+        } else {
+            mMap.addMarker(new MarkerOptions().position(clickPos).title("Custom location").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            clickPos = null;
+        }
+
+        return true;
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -234,5 +296,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }
