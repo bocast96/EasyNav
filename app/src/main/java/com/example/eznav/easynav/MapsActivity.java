@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Address;
+import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
@@ -16,10 +17,13 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.util.Log;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -36,11 +40,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuItemClickListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -54,6 +61,10 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
     private String addressText;
     private MarkerOptions markerOptions;
     private GoogleMap.OnMapClickListener onMapClickListener;
+    private Marker searchPin;
+    private Location myLocation;
+    ArrayList<LatLng> MarkerPoints;
+    private SearchView searchView;
 
 
     /**
@@ -63,17 +74,19 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
     private GoogleApiClient client;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        MarkerPoints = new ArrayList<>();
+
+
         //for search functionality
-        final SearchView searchView = (SearchView) findViewById(R.id.search_button);
-        //searchView.setVisibility();
+        searchView = (SearchView) findViewById(R.id.search_button);
+        searchView.setIconifiedByDefault(false);
         searchView.clearFocus();
+        searchView.setQueryHint("Enter location");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -100,6 +113,51 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
             @Override
             public boolean onQueryTextChange(String newText) {
                 return false;
+            }
+        });
+
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        myLocation = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+        if (myLocation == null) {
+            Criteria crit = new Criteria();
+            crit.setAccuracy(Criteria.ACCURACY_COARSE);
+            // Finds a provider that matches the criteria
+            String provider = locationManager.getBestProvider(crit, true);
+            // Use the provider to get the last known location
+            myLocation = locationManager.getLastKnownLocation(provider);
+        }
+
+        ImageButton directionsButton = (ImageButton) findViewById(R.id.imageButtonDir);
+        directionsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                mMap.setMyLocationEnabled(false);
+                EditText etDestination = (EditText) findViewById(R.id.etDestination);
+                etDestination.setVisibility(View.VISIBLE);
+                //ViewFlipper vf = (ViewFlipper)findViewById(R.id.viewFlipper);
+                //vf.showNext();
             }
         });
 
@@ -182,10 +240,35 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
 
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(collegePark));
         float zoomLevel = 17.0f; //This goes up to 21
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(collegePark, zoomLevel));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(collegePark, zoomLevel));
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+
+        Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+        if (location == null){
+            Criteria crit = new Criteria();
+            crit.setAccuracy(Criteria.ACCURACY_COARSE);
+            // Finds a provider that matches the criteria
+            String provider = locationManager.getBestProvider(crit, true);
+            // Use the provider to get the last known location
+            location = locationManager.getLastKnownLocation(provider);
+        }
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
+                .zoom(17)                   // Sets the zoom
+                //.bearing(90)                // Sets the orientation of the camera to east
+                //.tilt(40)                   // Sets the tilt of the camera to 30 degrees
+                .build();                   // Creates a CameraPosition from the builder
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
     protected void search(List<Address> addresses) {
+
+        if(searchPin != null){
+            searchPin.remove();
+        }
 
         Address address = addresses.get(0);
         home_long = address.getLongitude();
@@ -203,9 +286,18 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
         markerOptions.title(addressText);
 
         //mMap.clear();
-        mMap.addMarker(markerOptions);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+        searchPin =  mMap.addMarker(markerOptions);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(address.getLatitude(), address.getLongitude()), 13));
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(new LatLng(address.getLatitude(), address.getLongitude()))      // Sets the center of the map to location user
+                .zoom(17)                   // Sets the zoom
+                //.bearing(90)                // Sets the orientation of the camera to east
+                //.tilt(40)                   // Sets the tilt of the camera to 30 degrees
+                .build();                   // Creates a CameraPosition from the builder
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        //mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
         //locationTv.setText("Latitude:" + address.getLatitude() + ", Longitude:"
         //       + address.getLongitude());
 
