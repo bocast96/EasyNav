@@ -153,11 +153,42 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
                     // for ActivityCompat#requestPermissions for more details.
                     return;
                 }
-                mMap.setMyLocationEnabled(false);
-                EditText etDestination = (EditText) findViewById(R.id.etDestination);
-                etDestination.setVisibility(View.VISIBLE);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 13));
+
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()))      // Sets the center of the map to location user
+                        .zoom(17)                   // Sets the zoom
+                        .build();                   // Creates a CameraPosition from the builder
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                //mMap.addMarker(myLocation);
+                EditText etOrigin = (EditText) findViewById(R.id.etOrigin);
+                findViewById(R.id.directionsGrid).setVisibility(View.VISIBLE);
+
+                searchView.setVisibility(View.GONE);
+                findViewById(R.id.imageButtonDir).setVisibility(View.GONE);
+                findViewById(R.id.imageButtonReport).setVisibility(View.GONE);
+                //etOrigin.setVisibility(View.VISIBLE);
+                etOrigin.setText("Current Location");
+                //findViewById(R.id.backButton).setVisibility(View.VISIBLE);
                 //ViewFlipper vf = (ViewFlipper)findViewById(R.id.viewFlipper);
                 //vf.showNext();
+            }
+        });
+
+        ImageButton backButton = (ImageButton)findViewById(R.id.backButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                //mMap.addMarker(myLocation);
+
+                findViewById(R.id.directionsGrid).setVisibility(View.GONE);
+
+                searchView.setVisibility(View.VISIBLE);
+                findViewById(R.id.imageButtonDir).setVisibility(View.VISIBLE);
+                findViewById(R.id.imageButtonReport).setVisibility(View.VISIBLE);
+                //etOrigin.setVisibility(View.VISIBLE);
             }
         });
 
@@ -174,6 +205,10 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
 
     }
 
+    /*
+    public void onBackPressed(){
+        // do something here and don't write super.onBackPressed()
+    }*/
 
     /**
      * Manipulates the map once available.
