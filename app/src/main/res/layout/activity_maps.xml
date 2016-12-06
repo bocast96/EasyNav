@@ -59,7 +59,8 @@
 
         <GridLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="110dp"
+            android:padding="10dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
@@ -67,8 +68,9 @@
             android:id="@+id/directionsGrid"
             android:background="@color/directionsColor">
 
+
             <ImageButton
-                android:layout_width="wrap_content"
+                android:layout_width="56dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/backButton"
                 android:layout_gravity="left"
@@ -77,7 +79,7 @@
                 android:src="@drawable/back_arrow_white"
                 />
             <EditText
-                android:layout_width="match_parent"
+                android:layout_width="298dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/etOrigin"
                 android:layout_row="0"
@@ -87,9 +89,11 @@
                 android:hint="Current Location"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:padding="10dp"
+                android:background="#3f8cb5"/>
             <EditText
-                android:layout_width="match_parent"
+                android:layout_width="298dp"
                 android:layout_height="wrap_content"
                 android:hint="Enter destination address"
                 android:id="@+id/etDestination"
@@ -99,7 +103,9 @@
                 android:textColorHint="#FFFFFF"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:padding="10dp"
+                android:background="#3f8cb5"/>
 
         </GridLayout>
 
@@ -108,3 +114,107 @@
 </LinearLayout>
 
 
+
+    <!--
+
+
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="60dp"
+                android:layout_height="120dp"
+                android:layout_marginTop="65dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_gravity="right">
+
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageButtonDir"
+                    android:layout_gravity="right"
+                    android:onClick="onButtonClickDirections"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:src="@mipmap/directions" />
+
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageButtonReport"
+                    android:layout_gravity="right"
+                    android:onClick="onButtonClickReport"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:src="@mipmap/report" />
+            </LinearLayout>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:id="@+id/directionsGrid"
+                android:background="@color/directionsColor"
+                android:padding="10dp"
+                android:layout_height="110dp"
+                android:layout_below="@+id/map"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                >
+                android:visibility="gone">
+
+
+
+                <ImageButton
+                    android:layout_width="56dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/backButton"
+                    android:layout_gravity="left"
+                    android:onClick="onButtonClickDirections"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:src="@drawable/back_arrow_white" />
+
+                <EditText
+                    android:layout_width="298dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter destination address"
+                    android:id="@+id/etDestination"
+                    android:layout_row="1"
+                    android:layout_column="1"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#FFFFFF"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:padding="10dp"
+                    android:background="#3f8cb5" />
+
+                <EditText
+                    android:layout_width="298dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/etOrigin"
+                    android:layout_row="0"
+                    android:layout_column="1"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#FFFFFF"
+                    android:background="#3f8cb5"
+                    android:hint="Current Location"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:layout_gravity="left"
+                    android:padding="10dp"
+                    android:paddingTop="10dp" />
+
+            </GridLayout>
+
+
+        </RelativeLayout>
+
+        <SearchView
+            android:layout_width="match_parent"
+            android:id="@+id/search_button"
+            android:layout_gravity="left"
+            android:layout_height="40dp" />
+
+
+    </LinearLayout>
+
+    -->

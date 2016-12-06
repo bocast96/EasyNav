@@ -36,6 +36,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -45,9 +46,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
@@ -81,6 +86,9 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
     private Location myLocation;
     ArrayList<LatLng> MarkerPoints;
     private SearchView searchView;
+    String title = "";
+    float color = BitmapDescriptorFactory.HUE_AZURE;
+    Polyline directionsLine = null;
 
 
     /**
@@ -155,7 +163,7 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
             myLocation = locationManager.getLastKnownLocation(provider);
         }
 
-        ImageButton directionsButton = (ImageButton) findViewById(R.id.imageButtonDir);
+        final ImageButton directionsButton = (ImageButton) findViewById(R.id.imageButtonDir);
         directionsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -169,6 +177,7 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
                     // for ActivityCompat#requestPermissions for more details.
                     return;
                 }
+
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 13));
 
                 CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -180,7 +189,7 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
                 //mMap.addMarker(myLocation);
                 EditText etOrigin = (EditText) findViewById(R.id.etOrigin);
                 findViewById(R.id.directionsGrid).setVisibility(View.VISIBLE);
-
+                etOrigin.requestFocus();
                 searchView.setVisibility(View.GONE);
                 findViewById(R.id.imageButtonDir).setVisibility(View.GONE);
                 findViewById(R.id.imageButtonReport).setVisibility(View.GONE);
@@ -196,11 +205,14 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(directionsLine != null){
+                    directionsLine.remove();
+                }
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
                 //mMap.addMarker(myLocation);
 
                 findViewById(R.id.directionsGrid).setVisibility(View.GONE);
-
+                searchView.clearFocus();
                 searchView.setVisibility(View.VISIBLE);
                 findViewById(R.id.imageButtonDir).setVisibility(View.VISIBLE);
                 findViewById(R.id.imageButtonReport).setVisibility(View.VISIBLE);
@@ -208,19 +220,78 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
             }
         });
 
-        EditText destination = (EditText) findViewById(R.id.etDestination);
+        final EditText destination = (EditText) findViewById(R.id.etDestination);
         destination.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                LatLng origin = new LatLng(myLocation.getLatitude(),myLocation.getLongitude());
-                LatLng destination = new LatLng(38.9907439, -76.9362396);
+                if(directionsLine != null){
+                    directionsLine.remove();
+                }
+                String dest = destination.getText().toString();
+                String ori = ((EditText)findViewById(R.id.etOrigin)).getText().toString();
 
-                String url = getUrl(origin,destination);
-                FetchUrl FetchUrl = new FetchUrl();
+                Log.i("directions",dest + " " + ori);
 
-                FetchUrl.execute(url);
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(origin));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+                if(dest.equals("")) {
+                    return true;
+                }
+                LatLng end = null;
+                LatLng begin = null;
+
+                if(ori.equals("")){
+                    begin = new LatLng(myLocation.getLatitude(),myLocation.getLongitude());
+                }
+                Geocoder geocoder = new Geocoder(getBaseContext());
+                List<Address> destList = null;
+                List<Address> oriList = null;
+
+                try {
+                    // Getting a maximum of 3 Address that matches the input
+                    // text
+                    destList = geocoder.getFromLocationName(dest, 3);
+                    Log.i("Directions",destList.toString());
+
+                    oriList = geocoder.getFromLocationName(ori,3);
+                    Log.i("Directions",oriList.toString());
+                    if (destList != null && !destList.equals("")) {
+                        end = searchLocation(destList);
+                    }
+                    if (oriList != null && !oriList.equals("")) {
+                        begin = searchLocation(oriList);
+                    }
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                if(begin != null && end != null) {
+                    String url = getUrl(begin, end);
+                    FetchUrl FetchUrl = new FetchUrl();
+
+                    FetchUrl.execute(url);
+
+                    mMap.addMarker(new MarkerOptions().position(end).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                    builder.include(begin);
+                    builder.include(end);
+                    LatLngBounds bounds = builder.build();
+                    int padding = 100; // offset from edges of the map in pixels
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                    mMap.moveCamera(cu);
+                    mMap.animateCamera(cu);
+                    destination.clearFocus();
+                    findViewById(R.id.etOrigin).clearFocus();
+                } else {
+                    if(begin == null){
+                        Log.i("directions",ori+" is not returning anything");
+                    } else if(dest == null){
+                        Log.i("directions",dest+" is not returning anything");
+                    }
+
+                }
                 return true;
             }
         });
@@ -252,13 +323,12 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Log.i("TEST", "TEST");
         mMap = googleMap;
 
         onMapClickListener = new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                mMap.addMarker(new MarkerOptions().position(latLng).title("Custom location").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                mMap.addMarker(new MarkerOptions().position(latLng).title(title).icon(BitmapDescriptorFactory.defaultMarker(color)));
                 mMap.setOnMapClickListener(null);
             }
         };
@@ -276,37 +346,24 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
             return;
         }
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
 
-        LatLng collegePark = new LatLng(38.9907439, -76.9362396);
-        LatLng avwilliams_bike_rack_front = new LatLng(38.9906623, -76.9364820);
-        LatLng avwilliams_bike_rack_side = new LatLng(38.9901492, -76.9365354);
-        mMap.addMarker(new MarkerOptions().position(collegePark).title("Marker in CP"));
+        //LatLng collegePark = new LatLng(38.9907439, -76.9362396);
+        //LatLng avwilliams_bike_rack_front = new LatLng(38.9906623, -76.9364820);
+        //LatLng avwilliams_bike_rack_side = new LatLng(38.9901492, -76.9365354);
+        //mMap.addMarker(new MarkerOptions().position(collegePark).title("Marker in CP"));
 
-        mMap.addMarker(new MarkerOptions().position(avwilliams_bike_rack_front).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-        mMap.addMarker(new MarkerOptions().position(avwilliams_bike_rack_side).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-        //mMap.addMarker(new MarkerOptions().position(avwilliams_bike_rack_side).icon(BitmapDescriptorFactory.fromResource(R.drawable.bikerackpin)));
+        //mMap.addMarker(new MarkerOptions().position(avwilliams_bike_rack_front).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        //mMap.addMarker(new MarkerOptions().position(avwilliams_bike_rack_side).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(collegePark));
-        float zoomLevel = 17.0f; //This goes up to 21
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(collegePark, zoomLevel));
+
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
 
@@ -328,6 +385,27 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
                 //.tilt(40)                   // Sets the tilt of the camera to 30 degrees
                 .build();                   // Creates a CameraPosition from the builder
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+
+    private LatLng searchLocation(List<Address> addresses) {
+
+        Address address = addresses.get(0);
+        home_long = address.getLongitude();
+        home_lat = address.getLatitude();
+        latLng = new LatLng(address.getLatitude(), address.getLongitude());
+
+        addressText = String.format(
+                "%s, %s",
+                address.getMaxAddressLineIndex() > 0 ? address
+                        .getAddressLine(0) : "", address.getCountryName());
+
+        markerOptions = new MarkerOptions();
+
+        markerOptions.position(latLng);
+        markerOptions.title(addressText);
+
+        return latLng;
+
     }
 
     protected void search(List<Address> addresses) {
@@ -390,18 +468,27 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
     }
 
     public boolean onMenuItemClick(MenuItem item) {
+
         switch (item.getItemId()) {
             case R.id.menuGap:
                 // TODO: 12/4/2016 set icon
+                title = "Sidewalk Obstruction";
+                color = BitmapDescriptorFactory.HUE_MAGENTA;
                 break;
             case R.id.menuConstruct:
                 // TODO: 12/4/2016 set icon
+                title = "Construction";
+                color = BitmapDescriptorFactory.HUE_YELLOW;
                 break;
             case R.id.menuEntrance:
                 // TODO: 12/4/2016 set icon
+                title = "Accessible Entrance";
+                color = BitmapDescriptorFactory.HUE_BLUE;
                 break;
             case R.id.menuBike:
                 // TODO: 12/4/2016 set icon
+                title = "Bike rack";
+                color = BitmapDescriptorFactory.HUE_GREEN;
                 break;
         }
 
@@ -409,7 +496,7 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
             Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
             mMap.setOnMapClickListener(onMapClickListener);
         } else {
-            mMap.addMarker(new MarkerOptions().position(clickPos).title("Custom location").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            mMap.addMarker(new MarkerOptions().position(clickPos).title(title).icon(BitmapDescriptorFactory.defaultMarker(color)));
             clickPos = null;
         }
 
@@ -482,8 +569,10 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
         // Sensor enabled
         String sensor = "sensor=false";
 
+        String mode = "mode=bicycling";
+
         // Building the parameters to the web service
-        String parameters = origin_string + "&" + dest_string + "&" + sensor;
+        String parameters = origin_string + "&" + dest_string + "&" + sensor + "&"+ mode;
 
         // Output format
         //String output = "json";
@@ -632,7 +721,7 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
 
             // Drawing polyline in the Google Map for the i-th route
             if(lineOptions != null) {
-                mMap.addPolyline(lineOptions);
+                directionsLine = mMap.addPolyline(lineOptions);
             }
             else {
                 Log.d("onPostExecute","without Polylines drawn");
