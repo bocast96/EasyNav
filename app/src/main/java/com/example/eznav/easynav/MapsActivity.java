@@ -17,6 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -24,6 +25,7 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -183,7 +185,7 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
                 findViewById(R.id.imageButtonDir).setVisibility(View.GONE);
                 findViewById(R.id.imageButtonReport).setVisibility(View.GONE);
                 //etOrigin.setVisibility(View.VISIBLE);
-                etOrigin.setText("Current Location");
+                etOrigin.setHint("Current Location");
                 //findViewById(R.id.backButton).setVisibility(View.VISIBLE);
                 //ViewFlipper vf = (ViewFlipper)findViewById(R.id.viewFlipper);
                 //vf.showNext();
@@ -206,7 +208,22 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
             }
         });
 
+        EditText destination = (EditText) findViewById(R.id.etDestination);
+        destination.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                LatLng origin = new LatLng(myLocation.getLatitude(),myLocation.getLongitude());
+                LatLng destination = new LatLng(38.9907439, -76.9362396);
 
+                String url = getUrl(origin,destination);
+                FetchUrl FetchUrl = new FetchUrl();
+
+                FetchUrl.execute(url);
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(origin));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+                return true;
+            }
+        });
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()

@@ -80,10 +80,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/etOrigin"
-                android:hint="Enter origin address"
                 android:layout_row="0"
                 android:layout_column="1"
-                android:textColor="#FFFFFF"/>
+                android:textColor="#FFFFFF"
+                android:textColorHint="#FFFFFF"
+                android:hint="Current Location"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1" />
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -92,7 +96,10 @@
                 android:layout_row="1"
                 android:layout_column="1"
                 android:textColor="#FFFFFF"
-                android:textColorHint="#FFFFFF"/>
+                android:textColorHint="#FFFFFF"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1" />
 
         </GridLayout>
 
