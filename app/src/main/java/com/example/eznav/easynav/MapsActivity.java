@@ -4,6 +4,9 @@ import android.*;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Criteria;
@@ -87,9 +90,9 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
     ArrayList<LatLng> MarkerPoints;
     private SearchView searchView;
     String title = "";
-    float color = BitmapDescriptorFactory.HUE_AZURE;
+    //float color = BitmapDescriptorFactory.HUE_AZURE;
     Polyline directionsLine = null;
-
+    int icon = -1;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -328,7 +331,7 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
         onMapClickListener = new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                mMap.addMarker(new MarkerOptions().position(latLng).title(title).icon(BitmapDescriptorFactory.defaultMarker(color)));
+                mMap.addMarker(new MarkerOptions().position(latLng).title(title).icon(BitmapDescriptorFactory.fromResource(icon)));
                 mMap.setOnMapClickListener(null);
             }
         };
@@ -472,23 +475,27 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
         switch (item.getItemId()) {
             case R.id.menuGap:
                 // TODO: 12/4/2016 set icon
+                icon = R.mipmap.sidewalk_obstruction;
                 title = "Sidewalk Obstruction";
-                color = BitmapDescriptorFactory.HUE_MAGENTA;
+                //color = BitmapDescriptorFactory.HUE_MAGENTA;
                 break;
             case R.id.menuConstruct:
                 // TODO: 12/4/2016 set icon
+                icon = R.mipmap.construction;
                 title = "Construction";
-                color = BitmapDescriptorFactory.HUE_YELLOW;
+                //color = BitmapDescriptorFactory.HUE_YELLOW;
                 break;
             case R.id.menuEntrance:
                 // TODO: 12/4/2016 set icon
+                icon = R.mipmap.mobility_entrance;
                 title = "Accessible Entrance";
-                color = BitmapDescriptorFactory.HUE_BLUE;
+                //color = BitmapDescriptorFactory.HUE_BLUE;
                 break;
             case R.id.menuBike:
                 // TODO: 12/4/2016 set icon
                 title = "Bike rack";
-                color = BitmapDescriptorFactory.HUE_GREEN;
+                icon = R.mipmap.bikerack_darkblue;
+                //color = BitmapDescriptorFactory.HUE_GREEN;
                 break;
         }
 
@@ -496,7 +503,7 @@ public class MapsActivity extends FragmentActivity implements PopupMenu.OnMenuIt
             Toast.makeText(this, "Tap to Drop Pin", Toast.LENGTH_SHORT).show();
             mMap.setOnMapClickListener(onMapClickListener);
         } else {
-            mMap.addMarker(new MarkerOptions().position(clickPos).title(title).icon(BitmapDescriptorFactory.defaultMarker(color)));
+            mMap.addMarker(new MarkerOptions().position(clickPos).title(title).icon(BitmapDescriptorFactory.fromResource(icon)));
             clickPos = null;
         }
 
