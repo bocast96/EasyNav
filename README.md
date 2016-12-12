@@ -1,13 +1,9 @@
 # EasyNav
 
-TODO:
-  * zoom out after directions  
-  * add iconified pins  
-  * capture back button after directions 
-  * subscribe to location changed listener
-  * clear button for dierctions
+## How to Run:
+* To run this app, download or clone this source code and open it up in a new Android Studio project. To run the app, the Google Play services SDK must be installed in Android Studio. A Google Maps API Key is also needed to run the project, which can be obtained from the Google Maps API website. The android studio emulator is not compatable with Google Maps so an Android phone or tablet is needed to run the app. 
 
-References:
+## References:
 
 1. Adding native Google search bar:  
 http://stackoverflow.com/questions/31136527/add-search-toolbar-over-google-map-like-in-native-android-app
