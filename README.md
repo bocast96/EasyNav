@@ -1,4 +1,8 @@
 # EasyNav
+EasyNav is an Android App designed to help low-mobility users better navigate to and from locations. EasyNav allows users to search for locations, find directions to a location, and report obstacles and accessibility features in their location. 
+
+## Team Members:
+* Matthew Skay, Shyam Krishnan, Brannon Hanks, Boris Castillo, Rishabh Sharan
 
 ## How to Run:
 * To run this app, download or clone this source code and open it up in a new Android Studio project. To run the app, the Google Play services SDK must be installed in Android Studio. A Google Maps API Key is also needed to run the project, which can be obtained from the Google Maps API website. The android studio emulator is not compatable with Google Maps so an Android phone or tablet is needed to run the app. 
